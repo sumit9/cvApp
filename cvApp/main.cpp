@@ -6,6 +6,10 @@
 using namespace std;
 using namespace cv;
 
+void loadImage(string imageName) {
+	ImageLoader::showImage(imageName);
+}
+
 int captureImageFromWebcam() {
 	VideoCapture cap(0);
 	if (!cap.isOpened()) {
@@ -23,8 +27,17 @@ int captureImageFromWebcam() {
 
 int main(int argc, char* argv[]) 
 {
-	//string imageName = argv[1];
-	//ImageLoader::showImage(imageName);
+	string sample = argv[1];
+	int option = atoi(sample.c_str());
+	switch (option)
+	{
+		case 1: 
+			break;
+		default:
+			string imageName = argv[2];
+			loadImage(imageName);
+			break;
+	}
 
 	waitKey(0);
 	return 0;
