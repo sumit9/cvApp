@@ -1,6 +1,10 @@
 #include <iostream>
+#include <stdio.h>
+#include <opencv2\core\core.hpp>
 #include <opencv2\opencv.hpp>
 #include <opencv2\highgui\highgui.hpp>
+#include <opencv2\features2d\features2d.hpp>
+#include <opencv2\nonfree\nonfree.hpp>
 #include "ImageLoader.h"
 
 using namespace std;
@@ -25,17 +29,56 @@ int captureImageFromWebcam() {
 	}
 }
 
+void featureDetectionSimpleMatching(string img, string img2) {
+	Mat image1 = imread(img, CV_LOAD_IMAGE_GRAYSCALE);
+	Mat image2 = imread(img2, CV_LOAD_IMAGE_GRAYSCALE);
+	if (image1.empty() || image2.empty()) {
+		cout << "Could not open or find one of the image files." << endl;
+		return;
+	}
+
+	//detecting keypoints
+	SurfFeatureDetector detector(3000);
+	vector<KeyPoint> keypt1, keypt2;
+	detector.detect(image1, keypt1);
+	detector.detect(image2, keypt2);
+
+	//compute descriptors
+	SurfDescriptorExtractor extractor;
+	Mat descriptor1, descriptor2;
+	extractor.compute(image1, keypt1, descriptor1);
+	extractor.compute(image2, keypt2, descriptor2);
+
+	//matching descriptors
+	BFMatcher matcher(NORM_L2);
+	vector<DMatch> matches;
+	matcher.match(descriptor1, descriptor2, matches);
+
+	//drawing the results
+	string window = "Matching Results";
+	namedWindow(window, 1);
+	Mat img_matches;
+	drawMatches(image1, keypt1, image2, keypt2, matches, img_matches);
+	imshow(window, img_matches);
+}
+
+void featureDetectionORBAlgo(string img, string img2) {
+}
+
 int main(int argc, char* argv[]) 
 {
 	string sample = argv[1];
 	int option = atoi(sample.c_str());
+	string img = argv[2];
+	string img2;
 	switch (option)
 	{
-		case 1: 
+		case 1:
+			img2 = argv[3];
+			featureDetectionSimpleMatching(img, img2);
 			break;
 		default:
-			string imageName = argv[2];
-			loadImage(imageName);
+			loadImage(img);
 			break;
 	}
 
